@@ -1,0 +1,9 @@
+== Example ==
+
+moodle = Moodle(PASSWORD, USERNAME)
+
+@moodle.with_moodle_session
+def list_course(session):
+    session
+
+list_course()
