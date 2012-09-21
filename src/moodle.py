@@ -14,19 +14,20 @@ class Moodle(object):
                 f(s, *args, **kwargs)
         return wrapped
 
+    def is_connected(self):
+        with self.session as s:
+            return "ogged in as" in s.get("http://moodle.epfl.ch/my").content
+
     def login(self, username, password):
         """Explicitly login into the moodle service, this will create
         a new moodle session as self.session
         """
         with requests.session() as self.session:
-            re = self.session.get("http://moodle.epfl.ch/login/index.php")
-            parsed_url = urlparse.urlsplit(re.url)
+            print self.session
+            #self.session.get("http://moodle.epfl.ch")
+            resp = self.session.get("http://moodle.epfl.ch/login/index.php")
+            parsed_url = urlparse.urlsplit(resp.url)
             dict_query = urlparse.parse_qs(parsed_url.query)
-            payload = {'requestkey': dict_query['requestkey'][0], 'username': username, 'password': password}
+            self.sesskey = dict_query['requestkey'][0]
+            payload = {'requestkey': self.sesskey, 'username': username, 'password': password}
             self.session.post("https://tequila.epfl.ch/cgi-bin/tequila/login", verify=True, data=payload)
-
-
-    def logout(self):
-        """
-        """
-        raise NotImplemented()
