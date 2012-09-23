@@ -8,22 +8,25 @@ class Moodle(object):
         """
         self.login(username, password)
 
-    def with_moodle_session(self, f):
+    def with_moodle_session(self, func):
+        """Decorator used with a moodle session. For example,
+
+        """
         def wrapped(*args, **kwargs):
             with self.session as s:
-                f(s, *args, **kwargs)
+                print "wrapped called"
+                return func(s, *args, **kwargs)
         return wrapped
 
     def is_connected(self):
         with self.session as s:
-            return "ogged in as" in s.get("http://moodle.epfl.ch/my").content
+            return s.get("http://moodle.epfl.ch/my").content
 
     def login(self, username, password):
         """Explicitly login into the moodle service, this will create
         a new moodle session as self.session
         """
         with requests.session() as self.session:
-            print self.session
             #self.session.get("http://moodle.epfl.ch")
             resp = self.session.get("http://moodle.epfl.ch/login/index.php")
             parsed_url = urlparse.urlsplit(resp.url)
