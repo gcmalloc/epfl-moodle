@@ -18,7 +18,7 @@ class Moodle(object):
     CHUNCK  = 1024 * 1024
 
     def __init__(self, username, password, caching=True):
-        """This will
+        """This will create a new moodle handshake.
         """
         self.login(username, password)
         if caching:
@@ -28,19 +28,6 @@ class Moodle(object):
             except ImportError:
                 logging.warning("requests_cache cannot be imported")
                 logging.warning("Moodle will be requested without caching")
-
-    @staticmethod
-    def with_moodle_session(func):
-        """Decorator used with a moodle session. For example,
-        """
-        def wrapped(it, *args, **kwargs):
-            with it.session as s:
-                return func(it, s, *args, **kwargs)
-        return wrapped
-
-    def is_connected(self):
-        with self.session as s:
-            s.get("http://moodle.epfl.ch/my").content
 
     def login(self, username, password):
         """Explicitly login into the moodle service, this will create
