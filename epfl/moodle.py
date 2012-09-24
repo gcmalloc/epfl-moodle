@@ -70,7 +70,7 @@ class Moodle(object):
             divisions.append(week_doc)
         return divisions
 
-    def get_document(self, course, directory=""):
+    def fetch_document(self, course, directory=""):
         content_page = self.session.get(course.link)
         soup = BeautifulSoup(content_page.content)
         content_url = soup.find('object', {'id':'resourceobject'})['data']

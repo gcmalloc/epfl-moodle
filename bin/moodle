@@ -3,6 +3,7 @@ from epfl.moodle import Moodle, Ressource
 import os
 import sys
 import codecs
+import json
 
 CONF_FILE = ".moodle"
 
@@ -13,7 +14,7 @@ def init_moodle_directory(moodle):
     print("Select the courses you want to download separated \
             by a comma, '{}' for all.").format(SELECT_ALL)
     for index, course in enumerate(courses):
-        print(u"{})) {}".format(index, course.name))
+        print(u"\t{})) {}".format(index, course.name))
     valid = False
     while not valid:
         input = raw_input(">>")
@@ -28,15 +29,19 @@ def init_moodle_directory(moodle):
                 print("Invalid value, please retry")
     return selection
 
-def course_download(moodle, url, directory):
+def course_download(moodle, url, directory=""):
    course = Ressource("Course", url)
    documents = moodle.get_documents(course)
+   if directory and not os.path.exists(directory):
+       os.mkdir(directory)
    for index, documents in enumerate(documents):
        dir_name = os.path.join(directory, str(index))
-       os.mkdir(dir_name)
+       if not os.path.exists(dir_name):
+           os.mkdir(dir_name)
        for document in documents:
-           moodle.get_document(document, dir_name)
+           moodle.fetch_document(document, dir_name)
 
+#this overwrite the default codec used for stdout
 streamWriter = codecs.lookup('utf-8')[-1]
 sys.stdout = streamWriter(sys.stdout)
 
@@ -44,6 +49,18 @@ print("Moodle handshake")
 moodle = Moodle(sys.argv[1], sys.argv[2])
 if len(sys.argv) == 3:
     if not os.path.exists(CONF_FILE):
-        init_moodle_directory(moodle)
+        selection = init_moodle_directory(moodle)
+        with open(CONF_FILE, "w") as f:
+            #serialiaze every course
+            dict_selection = [vars(s) for s in selection]
+            json.dump(dict_selection, f)
+    else:
+        with open(CONF_FILE) as f:
+            #deserialize
+            dict_selection = json.load(f)
+            #TODO this can be better rewritten
+            selection = [Ressource(dic['name'], dic['link']) for dic in dict_selection] 
+    for course in selection:
+        course_download(moodle, course.link, course.name)
 elif len(sys.argv) == 4:
     course_download(moodle, sys.argv[3])
