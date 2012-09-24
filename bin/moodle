@@ -2,17 +2,47 @@
 from epfl.moodle import Moodle, Ressource
 import os
 import sys
+import codecs
 
 CONF_FILE = ".moodle"
 
-def course_download(moodle, url):
+SELECT_ALL = 'a'
+def init_moodle_directory(moodle):
+    print("Downloading a list of courses")
+    courses = list(moodle.get_courses())
+    print("Select the courses you want to download separated \
+            by a comma, '{}' for all.").format(SELECT_ALL)
+    for index, course in enumerate(courses):
+        print("{})) {}".format(index, course))
+    valid = False
+    while not valid:
+        input = raw_input(">>")
+        if input == SELECT_ALL:
+            selection = courses
+            valid = True
+        else:
+            try:
+                selection = [courses[int(i)] for i in input.split(',')]
+                valid = True
+            except (ValueError, IndexError):
+                print("Invalid value, please retry")
+    return selection
+
+def course_download(moodle, url, directory):
    course = Ressource("Course", url)
    documents = moodle.get_documents(course)
    for index, documents in enumerate(documents):
-       dir_name = str(index)
+       dir_name = os.path.join(directory, str(index))
        os.mkdir(dir_name)
        for document in documents:
            moodle.get_document(document, dir_name)
 
-moodle = Moodle(sys.argv[1], sys.argv[2])
-course_download(moodle, sys.argv[3])
+streamWriter = codecs.lookup('utf-8')[-1]
+sys.stdout = streamWriter(sys.stdout)
+
+if len(sys.argv) == 3:
+    if not os.path.exists(CONF_FILE):
+        init_moodle_directory
+elif len(sys.argv) == 4:
+    moodle = Moodle(sys.argv[1], sys.argv[2])
+    course_download(moodle, sys.argv[3])
