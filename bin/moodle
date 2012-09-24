@@ -13,7 +13,7 @@ def init_moodle_directory(moodle):
     print("Select the courses you want to download separated \
             by a comma, '{}' for all.").format(SELECT_ALL)
     for index, course in enumerate(courses):
-        print("{})) {}".format(index, course))
+        print(u"{})) {}".format(index, course.name))
     valid = False
     while not valid:
         input = raw_input(">>")
@@ -40,9 +40,10 @@ def course_download(moodle, url, directory):
 streamWriter = codecs.lookup('utf-8')[-1]
 sys.stdout = streamWriter(sys.stdout)
 
+print("Moodle handshake")
+moodle = Moodle(sys.argv[1], sys.argv[2])
 if len(sys.argv) == 3:
     if not os.path.exists(CONF_FILE):
-        init_moodle_directory
+        init_moodle_directory(moodle)
 elif len(sys.argv) == 4:
-    moodle = Moodle(sys.argv[1], sys.argv[2])
     course_download(moodle, sys.argv[3])
