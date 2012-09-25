@@ -5,6 +5,7 @@ import logging
 try:
     from bs4 import BeautifulSoup
 except ImportError:
+    #fallback from bs4
     from BeautifulSoup import BeautifulSoup
 import os
 import socket
@@ -27,6 +28,10 @@ class Moodle(object):
 
     CHUNCK  = 1024 * 1024
 
+    TEQUILA_LOGIN = "http://moodle.epfl.ch/login/index.php"
+
+    MAIN_PAGE = "http://moodle.epfl.ch/my"
+
     def __init__(self, username, password, caching=False):
         """This will create a new moodle handshake.
         """
@@ -42,9 +47,11 @@ class Moodle(object):
     def login(self, username, password):
         """Explicitly login into the moodle service, this will create
         a new moodle session as self.session
+
+        :raise TequilaError:
         """
         with requests.session() as self.session:
-            resp = self.session.get("http://moodle.epfl.ch/login/index.php")
+            resp = self.session.get(Moodle.TEQUILA_LOGIN)
             if resp.status_code != 200:
                 raise ConnexionIssue()
             parsed_url = urlparse.urlsplit(resp.url)
@@ -54,6 +61,7 @@ class Moodle(object):
             resp = self.session.post("https://tequila.epfl.ch/cgi-bin/tequila/login", verify=True, data=payload)
             error = BeautifulSoup(resp.text).find('font', color='red', size='+1')
             if error:
+                #grab the tequila error if any
                 raise TequilaError(error.string)
             if resp.status_code != 200:
                 raise ConnexionIssue()
@@ -66,7 +74,9 @@ class Moodle(object):
     def get_courses(self):
         """return a dict with course id as key and course name as value
         """
-        main_page = self.session.get("http://moodle.epfl.ch/my/")
+        main_page = self.session.get(Moodle.MAIN_PAGE)
+        if main_page.status_code != 200:
+            raise ConnexionIssue()
         soup = BeautifulSoup(main_page.text)
         for course_head in soup('h3', 'main'):
             course_link = course_head.find('a')
@@ -78,6 +88,8 @@ class Moodle(object):
         document in the course and in the section.
         """
         course_page = self.session.get(course.link)
+        if course_page.status_code != 200:
+            raise ConnexionIssue()
         soup = BeautifulSoup(course_page.text)
         content = soup.find('div', {'class':'course-content'})
         #Week separation
@@ -95,9 +107,11 @@ class Moodle(object):
         return divisions
 
     def fetch_document(self, document, directory=""):
-        """Download document `document`
+        """Download document `document` into `directory`
         """
         content_page = self.session.get(document.link)
+        if content_page.status_code != 200:
+            raise ConnexionIssue()
         if content_page.url != document.link:
             #we have a redirection
             content_url = content_page.url
@@ -111,9 +125,9 @@ class Moodle(object):
                 parent_content_tag = soup.find('div', 'resourceworkaround')
                 content_url = parent_content_tag.find('a')['href']
 
+        file_in = self.session.get(content_url)
         file_name = os.path.basename(urlparse.urlparse(content_url)[2])
         file_path = os.path.join(directory, file_name)
-        file_in = self.session.get(content_url)
 
         if os.path.exists(file_path):
             logging.error(u"File {} already exist".format(file_path))
@@ -122,4 +136,4 @@ class Moodle(object):
 
         with open(file_path, 'wb') as file_out:
             file_out.write(file_in.content)
-        return
+

@@ -8,7 +8,7 @@ import getpass
 
 CONF_FILE = ".moodle"
 
-SELECT_ALL = 'a'
+SELECT_ALL_KEY = 'a'
 def init_moodle_directory(moodle):
     """This method will create a .moodle file. This contains the list of all the courses
     to be downloaded
@@ -16,13 +16,13 @@ def init_moodle_directory(moodle):
     print("Downloading a list of courses")
     courses = list(moodle.get_courses())
     print("Select the courses you want to download separated"
-          "by a comma, '{}' to select all courses.").format(SELECT_ALL)
+          "by a comma, '{}' to select all courses.").format(SELECT_ALL_KEY)
     for index, course in enumerate(courses):
         print(u"\t{})) {}".format(index, course.name))
     valid = False
     while not valid:
         input = raw_input(">>")
-        if input == SELECT_ALL:
+        if input == SELECT_ALL_KEY:
             selection = courses
             valid = True
             print("All the course are selected")
