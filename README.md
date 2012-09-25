@@ -2,8 +2,8 @@
 ## Requirements
 * `setuptools` for the installation
 * `python-2.7`
-* `BeautifulSoup`
-* `requests`
+* `BeautifulSoup` (installed by the setup.py)
+* `requests` (installed by the setup.py)
 * `requests-cache` (optional)
 * A moodle account subscribed to at least one course
 
@@ -11,7 +11,7 @@
 ## Installation
 Type:
 
-    git clone git@github.com:gcmalloc/epfl-moodle.git
+    git clone git://github.com/gcmalloc/epfl-moodle.git
     cd epfl-moodle
     python setup.py install
 
