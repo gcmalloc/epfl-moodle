@@ -5,5 +5,5 @@ setup(name='epfl-menu',
       author = 'gcmalloc',
       url = 'http://github.com/gcmalloc/epfl-moodle',
       py_modules = ['epfl.moodle'],
-      install_requires=['BeautifulSoup', 'requests'],
+      install_requires=['BeautifulSoup4', 'requests'],
       scripts = ['bin/moodle'])

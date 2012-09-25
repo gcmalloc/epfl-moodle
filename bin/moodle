@@ -10,6 +10,9 @@ CONF_FILE = ".moodle"
 
 SELECT_ALL = 'a'
 def init_moodle_directory(moodle):
+    """This method will create a .moodle file. This contains the list of all the courses
+    to be downloaded
+    """
     print("Downloading a list of courses")
     courses = list(moodle.get_courses())
     print("Select the courses you want to download separated"
@@ -47,49 +50,56 @@ def print_usage():
     print("Read The README")
     exit(1)
 
-print('''
-                          #  ""#          
- mmmmm   mmm    mmm    mmm#    #     mmm  
- # # #  #" "#  #" "#  #" "#    #    #"  # 
- # # #  #   #  #   #  #   #    #    #"""" 
- # # #  "#m#"  "#m#"  "#m##    "mm  "#mm" 
+def print_banner():
+    print('''
+                              #  ""#          
+     mmmmm   mmm    mmm    mmm#    #     mmm  
+     # # #  #" "#  #" "#  #" "#    #    #"  # 
+     # # #  #   #  #   #  #   #    #    #"""" 
+     # # #  "#m#"  "#m#"  "#m##    "mm  "#mm" 
+    ''')
 
-''')
-#this overwrite the default codec used for stdout
-streamWriter = codecs.lookup('utf-8')[-1]
-sys.stdout = streamWriter(sys.stdout)
+def output_to_utf8():
+    #this overwrite the default codec used for stdout
+    streamWriter = codecs.lookup('utf-8')[-1]
+    sys.stdout = streamWriter(sys.stdout)
 
-if len(sys.argv) < 2 or len(sys.argv) > 4:
-    print_usage()
+def main():
+    print_banner()
+    output_to_utf8()
+    if len(sys.argv) < 2 or len(sys.argv) > 4:
+        print_usage()
 
-if len(sys.argv) == 2:
-    passwd = getpass.getpass()
-    if not passwd:
-        print("You didn't provide any password")
+    if len(sys.argv) == 2:
+        passwd = getpass.getpass()
+        if not passwd:
+            print("You didn't provide any password")
+            exit(2)
+        sys.argv.append(passwd)
+    try:
+        print("Moodle handshake, please be patient.")
+        moodle = Moodle(sys.argv[1], sys.argv[2])
+    except (ConnexionIssue) as e:
+        print(u"Issue with authentication {}".format(str(e).strip()))
         exit(2)
-    sys.argv.append(passwd)
-try:
-    print("Moodle handshake, please be patient.")
-    moodle = Moodle(sys.argv[1], sys.argv[2])
-except (ConnexionIssue) as e:
-    print(u"Issue with authentication {}".format(str(e).strip()))
-    exit(2)
 
-if len(sys.argv) == 3:
-    if not os.path.exists(CONF_FILE):
-        selection = init_moodle_directory(moodle)
-        with open(CONF_FILE, "w") as f:
-            #serialiaze every course
-            dict_selection = [vars(s) for s in selection]
-            json.dump(dict_selection, f)
-    else:
-        with open(CONF_FILE) as f:
-            #deserialize
-            dict_selection = json.load(f)
-            #TODO this can be better rewritten
-            selection = [Ressource(dic['name'], dic['link']) for dic in dict_selection] 
-    for course in selection:
-        print(u"Fetching course {}.".format(course.name))
-        course_download(moodle, course.link, course.name)
-elif len(sys.argv) == 4:
-    course_download(moodle, sys.argv[3])
+    if len(sys.argv) == 3:
+        if not os.path.exists(CONF_FILE):
+            selection = init_moodle_directory(moodle)
+            with open(CONF_FILE, "w") as f:
+                #serialiaze every course
+                dict_selection = [vars(s) for s in selection]
+                json.dump(dict_selection, f)
+        else:
+            with open(CONF_FILE) as f:
+                #deserialize
+                dict_selection = json.load(f)
+                selection = [Ressource(dic['name'], dic['link']) for dic in dict_selection] 
+        for course in selection:
+            print(u"Fetching course {}.".format(course.name))
+            course_download(moodle, course.link, course.name)
+    elif len(sys.argv) == 4:
+        course_download(moodle, sys.argv[3])
+
+if __name__ == '__main__':
+    main()

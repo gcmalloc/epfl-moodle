@@ -12,7 +12,7 @@ class Ressource(object):
         self.link = link
 
     def __str__(self):
-        return  "Ressource:" + self.name +"\nLink :" + self.link
+        return  "Ressource: {} Link: {}".format(self.name, self.link)
 
 class ConnexionIssue(socket.error):
     pass
@@ -68,7 +68,6 @@ class Moodle(object):
             yield Ressource(course_link.string, course_link['href'])
 
     def get_documents(self, course):
-        print course.link
         course_page = self.session.get(course.link)
         soup = BeautifulSoup(course_page.text)
         content = soup.find('div', {'class':'course-content'})
