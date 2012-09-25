@@ -16,7 +16,7 @@ def init_moodle_directory(moodle):
     print("Downloading a list of courses")
     courses = list(moodle.get_courses())
     print("Select the courses you want to download separated"
-          "by a comma, '{}' for all.").format(SELECT_ALL)
+          "by a comma, '{}' to select all courses.").format(SELECT_ALL)
     for index, course in enumerate(courses):
         print(u"\t{})) {}".format(index, course.name))
     valid = False

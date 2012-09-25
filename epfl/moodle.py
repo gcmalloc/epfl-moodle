@@ -59,6 +59,8 @@ class Moodle(object):
                 raise ConnexionIssue()
 
     def __exit__(self):
+        """Close the session when the module is closed.
+        """
         self.session.close()
 
     def get_courses(self):
@@ -71,6 +73,10 @@ class Moodle(object):
             yield Ressource(course_link.string, course_link['href'])
 
     def get_documents(self, course):
+        """Return a list of list of all the documents for a course
+        every item represent a section, and every subitem represent a
+        document in the course and in the section.
+        """
         course_page = self.session.get(course.link)
         soup = BeautifulSoup(course_page.text)
         content = soup.find('div', {'class':'course-content'})
@@ -78,15 +84,19 @@ class Moodle(object):
         weeks = content.find('ul',recursive=False).findAll('li', recursive=False)
         divisions = list()
         for week in weeks:
+            #week_title = week.find({"class":"sectionname"})
             week_documents = week('a')
             week_doc = list()
             for i in week_documents:
-                if 'resource' in i['href']:
+                #yes `a` tag without href exist
+                if i.get('href') and 'resource' in i.get('href'):
                     week_doc.append(Ressource(i.text, i['href']))
             divisions.append(week_doc)
         return divisions
 
     def fetch_document(self, document, directory=""):
+        """Download document `document`
+        """
         content_page = self.session.get(document.link)
         if content_page.url != document.link:
             #we have a redirection
