@@ -42,6 +42,16 @@ def course_download(moodle, url, directory=""):
        for document in documents:
            moodle.fetch_document(document, dir_name)
 
+print('''
+
+                                          
+                          #  ""#          
+ mmmmm   mmm    mmm    mmm#    #     mmm  
+ # # #  #" "#  #" "#  #" "#    #    #"  # 
+ # # #  #   #  #   #  #   #    #    #"""" 
+ # # #  "#m#"  "#m#"  "#m##    "mm  "#mm" 
+
+''')
 #this overwrite the default codec used for stdout
 streamWriter = codecs.lookup('utf-8')[-1]
 sys.stdout = streamWriter(sys.stdout)
@@ -50,11 +60,11 @@ sys.stdout.encoding = 'utf-8'
 print("Moodle handshake")
 if len(sys.argv) == 2:
     import getpass
-    paswd = getpass.getpass()
-    if not paswd:
+    passwd = getpass.getpass()
+    if not passwd:
         print("You didn't provide any password")
         return 
-
+    sys.argv.append(passwd)
 
 moodle = Moodle(sys.argv[1], sys.argv[2])
 
