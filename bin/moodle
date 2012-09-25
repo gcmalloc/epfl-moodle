@@ -40,7 +40,10 @@ def course_download(moodle, url, directory=""):
    if directory and not os.path.exists(directory):
        os.mkdir(directory)
    for index, documents in enumerate(documents):
-       dir_name = os.path.join(directory, str(index))
+       if index == 0:
+           dir_name = os.path.join(directory, "Globals")
+       else:
+           dir_name = os.path.join(directory, "Week "+str(index))
        if not os.path.exists(dir_name):
            os.mkdir(dir_name)
        for document in documents:
