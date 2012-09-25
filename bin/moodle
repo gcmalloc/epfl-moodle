@@ -47,7 +47,9 @@ def course_download(moodle, url, directory=""):
            moodle.fetch_document(document, dir_name)
 
 def print_usage():
-    print("Read The README")
+    print("No username supplied.")
+    print("Usage : moodle username [password] [course-id]")
+    print("If no password is supplied, you will be prompted for it.")
     exit(1)
 
 def print_banner():
