@@ -70,21 +70,31 @@ class Moodle(object):
             divisions.append(week_doc)
         return divisions
 
-    def fetch_document(self, course, directory=""):
-        content_page = self.session.get(course.link)
-        soup = BeautifulSoup(content_page.content)
-        content_url = soup.find('object', {'id':'resourceobject'})['data']
+    def fetch_document(self, document, directory=""):
+        print("Fetching :" + document.name +"  " + document.link)
+        content_page = self.session.get(document.link)
+        if content_page.url != content_page:
+            #we have a redirection
+            content_url = content_page.url
+        else:
+            soup = BeautifulSoup(content_page.text)
+            content_tag = soup.find('object', {'id':'resourceobject'})
+            if content_tag:
+                content_url = content_tag['data']
+            else:
+                #direct download
+                parent_content_tag = soup.find('div', 'resourceworkaround')
+                content_url = parent_content_tag.find('a')['href']
+
         file_name = os.path.basename(content_url)
         file_path = os.path.join(directory, file_name)
-        file_in = self.session.get(content_url).raw
+        file_in = self.session.get(content_url)
 
         if os.path.exists(file_path):
             logging.error("File {} already exist" + file_path)
             logging.error("Remove it to redownload it")
             return
+
         with open(file_path, 'wb') as file_out:
-            while True:
-                data = file_in.read(Moodle.CHUNCK)
-                if not data:
-                    break
-                file_out.write(data)
+            file_out.write(file_in.content)
+        return
