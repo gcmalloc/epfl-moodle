@@ -111,7 +111,7 @@ class Moodle(object):
                 parent_content_tag = soup.find('div', 'resourceworkaround')
                 content_url = parent_content_tag.find('a')['href']
 
-        file_name = os.path.basename(content_url)
+        file_name = os.path.basename(urlparse.urlparse(content_url)[2])
         file_path = os.path.join(directory, file_name)
         file_in = self.session.get(content_url)
 
