@@ -4,6 +4,7 @@ import urlparse
 import logging
 from BeautifulSoup import BeautifulSoup
 import os
+import socket
 
 class Ressource(object):
     def __init__(self, name, link):
@@ -12,6 +13,12 @@ class Ressource(object):
 
     def __str__(self):
         return  "Ressource:" + self.name +"\nLink :" + self.link
+
+class ConnexionIssue(socket.error):
+    pass
+
+class TequilaError(ConnexionIssue):
+    pass
 
 class Moodle(object):
 
@@ -35,11 +42,18 @@ class Moodle(object):
         """
         with requests.session() as self.session:
             resp = self.session.get("http://moodle.epfl.ch/login/index.php")
+            if resp.status_code != 200:
+                raise ConnexionIssue()
             parsed_url = urlparse.urlsplit(resp.url)
             dict_query = urlparse.parse_qs(parsed_url.query)
             self.sesskey = dict_query['requestkey'][0]
             payload = {'requestkey': self.sesskey, 'username': username, 'password': password}
-            self.session.post("https://tequila.epfl.ch/cgi-bin/tequila/login", verify=True, data=payload)
+            resp = self.session.post("https://tequila.epfl.ch/cgi-bin/tequila/login", verify=True, data=payload)
+            error = BeautifulSoup(resp.text).find('font', color='red', size='+1')
+            if error:
+                raise TequilaError(error.string)
+            if resp.status_code != 200:
+                raise ConnexionIssue()
 
     def __exit__(self):
         self.session.close()

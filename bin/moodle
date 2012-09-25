@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-from epfl.moodle import Moodle, Ressource
+from epfl.moodle import Moodle, Ressource, ConnexionIssue
 import os
 import sys
 import codecs
@@ -63,10 +63,13 @@ if len(sys.argv) == 2:
     passwd = getpass.getpass()
     if not passwd:
         print("You didn't provide any password")
-        return 
+        exit(2)
     sys.argv.append(passwd)
-
-moodle = Moodle(sys.argv[1], sys.argv[2])
+try:
+    moodle = Moodle(sys.argv[1], sys.argv[2])
+except (ConnexionIssue) as e:
+    print(u"Issue with authentication {}".format(str(e).strip()))
+    exit(2)
 
 if len(sys.argv) == 3:
     if not os.path.exists(CONF_FILE):
