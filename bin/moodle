@@ -41,10 +41,11 @@ def course_download(moodle, url, directory=""):
            os.mkdir(dir_name)
        for document in documents:
            moodle.fetch_document(document, dir_name)
+def usage():
+    print("Read The README")
+    exit(1)
 
 print('''
-
-                                          
                           #  ""#          
  mmmmm   mmm    mmm    mmm#    #     mmm  
  # # #  #" "#  #" "#  #" "#    #    #"  # 
@@ -56,6 +57,9 @@ print('''
 streamWriter = codecs.lookup('utf-8')[-1]
 sys.stdout = streamWriter(sys.stdout)
 sys.stdout.encoding = 'utf-8'
+
+if len(sys.argv) < 2 or len(sys.argv) > 3:
+    usage()
 
 print("Moodle handshake")
 if len(sys.argv) == 2:
