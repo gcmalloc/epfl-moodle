@@ -2,7 +2,10 @@
 import requests
 import urlparse
 import logging
-from BeautifulSoup import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    from BeautifulSoup import BeautifulSoup
 import os
 import socket
 
