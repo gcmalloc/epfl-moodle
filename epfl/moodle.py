@@ -118,8 +118,12 @@ class Moodle(object):
         else:
             soup = BeautifulSoup(content_page.text)
             content_tag = soup.find('object', {'id':'resourceobject'})
+            video_tag = soup.find('object', {'type':'video/mp4'})
             if content_tag:
                 content_url = content_tag['data']
+            elif video_tag:
+                #seems like there is a video as a ressource
+                content_url = video_tag['data']
             else:
                 #direct download
                 parent_content_tag = soup.find('div', 'resourceworkaround')
