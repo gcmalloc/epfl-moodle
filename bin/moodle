@@ -45,6 +45,7 @@ def course_download(moodle, url, directory=""):
 #this overwrite the default codec used for stdout
 streamWriter = codecs.lookup('utf-8')[-1]
 sys.stdout = streamWriter(sys.stdout)
+sys.stdout.encoding = 'utf-8'
 
 print("Moodle handshake")
 moodle = Moodle(sys.argv[1], sys.argv[2])

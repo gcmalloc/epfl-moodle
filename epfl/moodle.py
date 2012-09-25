@@ -71,9 +71,11 @@ class Moodle(object):
         return divisions
 
     def fetch_document(self, document, directory=""):
-        print("Fetching :" + document.name +"  " + document.link)
+        print("Fetching :" + document.name)
         content_page = self.session.get(document.link)
-        if content_page.url != content_page:
+        print document.link
+        print content_page.url
+        if content_page.url != document.link:
             #we have a redirection
             content_url = content_page.url
         else:
