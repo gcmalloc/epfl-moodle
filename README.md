@@ -1,6 +1,7 @@
 
 ## Requirements
-
+* `setuptools` for the installation
+* `python-2.7`
 * `BeautifulSoup`
 * `requests`
 * `requests-cache` (optional)
@@ -18,7 +19,7 @@ Do, with $username as your gaspar username and $password as your moodle password
     
     moodle $username $password
 
-This will initialise a moodle directory in the actual one. A menu will be displayed, choose which course you would like to keep up to date in this directory.
+This will initialise a moodle directory in the actual one. A menu will be displayed, choose which course you would like to keep up to date in this directory. Then the script will download all the specified courses.
 
 Then 
 
@@ -28,10 +29,12 @@ will update all the course kept in this directory
 
 You can also simply download a single course with 
 
-    moodle $username $password $cours
+    moodle $username $password $course
 With $id, the id of the course you want to scrap.
 
 the course must be a moodle url refering to a course in the form
 http://moodle.epfl.ch/course/view.php?id=$id
 
+You can also only specify the username and a prompt will be displayed asking you for the password
 
+    moodle $username
