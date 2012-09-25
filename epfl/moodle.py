@@ -24,7 +24,7 @@ class Moodle(object):
 
     CHUNCK  = 1024 * 1024
 
-    def __init__(self, username, password, caching=True):
+    def __init__(self, username, password, caching=False):
         """This will create a new moodle handshake.
         """
         self.login(username, password)
@@ -68,10 +68,10 @@ class Moodle(object):
             yield Ressource(course_link.string, course_link['href'])
 
     def get_documents(self, course):
+        print course.link
         course_page = self.session.get(course.link)
         soup = BeautifulSoup(course_page.text)
-        content = soup.find('div', 'course-content')
-
+        content = soup.find('div', {'class':'course-content'})
         #Week separation
         weeks = content.find('ul',recursive=False).findAll('li', recursive=False)
         divisions = list()

@@ -4,6 +4,7 @@ import os
 import sys
 import codecs
 import json
+import getpass
 
 CONF_FILE = ".moodle"
 
@@ -11,8 +12,8 @@ SELECT_ALL = 'a'
 def init_moodle_directory(moodle):
     print("Downloading a list of courses")
     courses = list(moodle.get_courses())
-    print("Select the courses you want to download separated \
-            by a comma, '{}' for all.").format(SELECT_ALL)
+    print("Select the courses you want to download separated"
+          "by a comma, '{}' for all.").format(SELECT_ALL)
     for index, course in enumerate(courses):
         print(u"\t{})) {}".format(index, course.name))
     valid = False
@@ -41,7 +42,8 @@ def course_download(moodle, url, directory=""):
            os.mkdir(dir_name)
        for document in documents:
            moodle.fetch_document(document, dir_name)
-def usage():
+
+def print_usage():
     print("Read The README")
     exit(1)
 
@@ -56,20 +58,18 @@ print('''
 #this overwrite the default codec used for stdout
 streamWriter = codecs.lookup('utf-8')[-1]
 sys.stdout = streamWriter(sys.stdout)
-sys.stdout.encoding = 'utf-8'
 
-if len(sys.argv) < 2 or len(sys.argv) > 3:
-    usage()
+if len(sys.argv) < 2 or len(sys.argv) > 4:
+    print_usage()
 
-print("Moodle handshake")
 if len(sys.argv) == 2:
-    import getpass
     passwd = getpass.getpass()
     if not passwd:
         print("You didn't provide any password")
         exit(2)
     sys.argv.append(passwd)
 try:
+    print("Moodle handshake, please be patient.")
     moodle = Moodle(sys.argv[1], sys.argv[2])
 except (ConnexionIssue) as e:
     print(u"Issue with authentication {}".format(str(e).strip()))
