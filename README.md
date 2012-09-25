@@ -10,6 +10,7 @@
 
 ## Installation
 Type:
+
     git clone git@github.com:gcmalloc/epfl-moodle.git
     cd epfl-moodle
     python setup.py install
