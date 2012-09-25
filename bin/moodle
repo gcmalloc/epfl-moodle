@@ -21,6 +21,7 @@ def init_moodle_directory(moodle):
         if input == SELECT_ALL:
             selection = courses
             valid = True
+            print("All the course are selected")
         else:
             try:
                 selection = [courses[int(i)] for i in input.split(',')]
@@ -61,6 +62,7 @@ if len(sys.argv) == 3:
             #TODO this can be better rewritten
             selection = [Ressource(dic['name'], dic['link']) for dic in dict_selection] 
     for course in selection:
+        print(u"Fetching course {}.".format(course.name))
         course_download(moodle, course.link, course.name)
 elif len(sys.argv) == 4:
     course_download(moodle, sys.argv[3])
