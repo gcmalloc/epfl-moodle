@@ -24,7 +24,7 @@ class Moodle(object):
         if caching:
             try:
                 import requests_cache
-                requests_cache.configure('demo_cache')
+                requests_cache.configure('.moodle_cache')
             except ImportError:
                 logging.warning("requests_cache cannot be imported")
                 logging.warning("Moodle will be requested without caching")
@@ -71,10 +71,7 @@ class Moodle(object):
         return divisions
 
     def fetch_document(self, document, directory=""):
-        print("Fetching :" + document.name)
         content_page = self.session.get(document.link)
-        print document.link
-        print content_page.url
         if content_page.url != document.link:
             #we have a redirection
             content_url = content_page.url
@@ -93,7 +90,7 @@ class Moodle(object):
         file_in = self.session.get(content_url)
 
         if os.path.exists(file_path):
-            logging.error("File {} already exist" + file_path)
+            logging.error(u"File {} already exist".format(file_path))
             logging.error("Remove it to redownload it")
             return
 
