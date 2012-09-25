@@ -123,7 +123,11 @@ class Moodle(object):
             else:
                 #direct download
                 parent_content_tag = soup.find('div', 'resourceworkaround')
-                content_url = parent_content_tag.find('a')['href']
+                content_url = parent_content_tag.find('a')
+                if content_url.get('href'):
+                    content_url = content_url['href']
+                else:
+                    return
 
         file_in = self.session.get(content_url)
         file_name = os.path.basename(urlparse.urlparse(content_url)[2])
