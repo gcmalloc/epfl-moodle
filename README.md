@@ -1,6 +1,6 @@
 
 ## Requirements
-* `setuptools` for the installation (in the python
+* `setuptools` for the installation (in the python package setuptools in debian)
 * `python-2.7`
 * `BeautifulSoup` (installed by the setup.py)
 * `requests` (installed by the setup.py)
