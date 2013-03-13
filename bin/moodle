@@ -9,6 +9,7 @@ import getpass
 CONF_FILE = ".moodle"
 
 SELECT_ALL_KEY = 'a'
+
 def init_moodle_directory(moodle):
     """This method will create a .moodle file. This contains the list of all the courses
     to be downloaded
@@ -51,7 +52,7 @@ def course_download(moodle, url, directory=""):
 
 def print_usage():
     print("No username supplied.")
-    print("Usage : moodle username [password] [course-id]")
+    print("Usage : moodle username [password [course-id]]")
     print("If no password is supplied, you will be prompted for it.")
     exit(1)
 
