@@ -127,6 +127,8 @@ class Moodle(object):
             else:
                 #direct download
                 parent_content_tag = soup.find('div', 'resourceworkaround')
+                if not parent_content_tag:
+                    return
                 content_url = parent_content_tag.find('a')
                 if content_url.get('href'):
                     content_url = content_url['href']
