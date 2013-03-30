@@ -5,6 +5,7 @@ import sys
 import codecs
 import json
 import getpass
+import argparse
 
 CONF_FILE = ".moodle"
 
@@ -52,7 +53,7 @@ def course_download(moodle, url, directory=""):
 
 def print_usage():
     print("No username supplied.")
-    print("Usage : moodle username [password [course-id]]")
+    print("Usage : moodle username [course-id]")
     print("If no password is supplied, you will be prompted for it.")
     exit(1)
 
@@ -73,23 +74,23 @@ def output_to_utf8():
 def main():
     print_banner()
     output_to_utf8()
-    if len(sys.argv) < 2 or len(sys.argv) > 4:
+
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
         print_usage()
 
-    if len(sys.argv) == 2:
-        passwd = getpass.getpass()
-        if not passwd:
-            print("You didn't provide any password")
-            exit(2)
-        sys.argv.append(passwd)
+    passwd = getpass.getpass()
+    if not passwd:
+        print("You didn't provide any password")
+        exit(2)
+
     try:
         print("Moodle handshake, please be patient.")
-        moodle = Moodle(sys.argv[1], sys.argv[2])
+        moodle = Moodle(sys.argv[1], passwd)
     except (ConnexionIssue) as e:
         print(u"Issue with authentication {}".format(str(e).strip()))
         exit(2)
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 2:
         if not os.path.exists(CONF_FILE):
             selection = init_moodle_directory(moodle)
             with open(CONF_FILE, "w") as f:
@@ -104,7 +105,7 @@ def main():
         for course in selection:
             print(u"Fetching course {}.".format(course.name))
             course_download(moodle, course.link, course.name)
-    elif len(sys.argv) == 4:
+    elif len(sys.argv) == 3:
         course_download(moodle, sys.argv[3])
 
 if __name__ == '__main__':
