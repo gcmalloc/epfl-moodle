@@ -9,6 +9,7 @@ except ImportError:
     from BeautifulSoup import BeautifulSoup
 import os
 import socket
+import time
 
 class Ressource(object):
     def __init__(self, name, link):
@@ -140,9 +141,20 @@ class Moodle(object):
         file_path = os.path.join(directory, file_name)
 
         if os.path.exists(file_path):
-            logging.error(u"File {} already exist".format(file_path))
-            logging.error("Remove it to redownload it")
-            return
+            logging.debug(u"File {} already exist, checking if the remote file is newer".format(file_path))
+            try:
+                remote_time = time.strptime(file_in.headers['last-modified'])
+            except (KeyError, ValueError) as e:
+                logging.debug("Couldn't parse the date.")
+                return
+            remote_timestamp = time.mktime(d.timetuple(remote_time))
+            local_timestamp = os.path.getmtime()
+            if  local_timestamp < remote_timestamp:
+                logging.debug(u"The remote file {} is newer than the local one.".format(file_path))
+                os.remove(file_path)
+            else:
+                logging.debug("the local file is the last remote file")
+                return
 
         with open(file_path, 'wb') as file_out:
             file_out.write(file_in.content)
