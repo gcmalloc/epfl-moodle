@@ -20,7 +20,8 @@ Do, with $username as your gaspar username :
     
     moodle $username
 
-This will initialise a moodle directory in the actual one. A menu will be displayed, choose which course you would like to keep up to date in this directory. Then the script will download all the specified courses.
+This will initialise a moodle configuration file in the current directory. A menu will be then displayed, choose which course you would like to keep up to date in this directory. Then the script will download all the specified courses.
+
 
 Then 
 
@@ -30,13 +31,9 @@ will update all the course kept in this directory
 
 You can also simply download a single course with 
 
-    moodle $username $password $course
+    moodle $username $course
 
-With $id, the id of the course you want to scrap.
+With $course, the id of the course you want to scrap.
 
 the course must be a moodle url refering to a course in the form
 http://moodle.epfl.ch/course/view.php?id=$id
-
-You can also only specify the username and a prompt will be displayed asking you for the password
-
-    moodle $username
