@@ -2,10 +2,11 @@
 from epfl.moodle import Moodle, Ressource, ConnexionIssue
 import os
 import sys
-import codecs
 import json
 import getpass
 import argparse
+if sys.version_info[0] == 3:
+    raw_input = input
 
 CONF_FILE = ".moodle"
 
@@ -18,7 +19,7 @@ def init_moodle_directory(moodle):
     print("Downloading a list of courses")
     courses = list(moodle.get_courses())
     print("Select the courses you want to download separated"
-          "by a comma, '{}' to select all courses.").format(SELECT_ALL_KEY)
+          "by a comma, '{}' to select all courses.".format(SELECT_ALL_KEY))
     for index, course in enumerate(courses):
         print(u"\t{})) {}".format(index, course.name))
     valid = False
@@ -68,12 +69,14 @@ def print_banner():
 
 def output_to_utf8():
     #this overwrite the default codec used for stdout
+    import codecs
     streamWriter = codecs.lookup('utf-8')[-1]
     sys.stdout = streamWriter(sys.stdout)
 
 def main():
     print_banner()
-    output_to_utf8()
+    if sys.version_info[0] == 2:
+        output_to_utf8()
 
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print_usage()

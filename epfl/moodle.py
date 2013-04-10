@@ -1,6 +1,9 @@
 #!/usr/bin/env python2
 import requests
-import urlparse
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 import logging
 try:
     from bs4 import BeautifulSoup
