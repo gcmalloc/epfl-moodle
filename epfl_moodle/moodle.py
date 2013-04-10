@@ -96,6 +96,10 @@ class Moodle(object):
             raise ConnexionIssue()
         soup = BeautifulSoup(course_page.text)
         content = soup.find('div', {'class':'course-content'})
+        #the student is not registered to the course anymore
+        if not content:
+            logging.error(u"You are not registered to the course {} anymore.".format(course))
+            return list()
         #Week separation
         weeks = content.find('ul',recursive=False).findAll('li', recursive=False)
         divisions = list()
