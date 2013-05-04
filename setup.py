@@ -1,7 +1,7 @@
 from setuptools import setup
 setup(
       name='epfl-moodle',
-      version = '0.4.2',
+      version = '0.4.3',
       description = 'A simple interface to moodle',
       author = 'gcmalloc',
       url = 'http://github.com/gcmalloc/epfl-moodle',

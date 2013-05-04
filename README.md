@@ -31,9 +31,10 @@ will update all the course kept in this directory
 
 You can also simply download a single course with 
 
-    moodle $username $course
+    moodle $username $course-url
 
-With $course, the id of the course you want to scrap.
-
-the course must be a moodle url refering to a course in the form
+With $course-url, the url of the course you want to scrap.This url 
+must match the following scheme:
 http://moodle.epfl.ch/course/view.php?id=$id
+
+The files will be downloaded in the current directory.

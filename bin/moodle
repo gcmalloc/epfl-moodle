@@ -5,12 +5,15 @@ import sys
 import json
 import getpass
 import argparse
+import re
 if sys.version_info[0] == 3:
     raw_input = input
 
 CONF_FILE = ".moodle"
 
 SELECT_ALL_KEY = 'a'
+
+COURSE_RE = re.compile("https?://moodle\.epfl\.ch/course/view.php\?id=\d+")
 
 def init_moodle_directory(moodle):
     """This method will create a .moodle file. This contains the list of all the courses
@@ -109,7 +112,13 @@ def main():
             print(u"Fetching course {}.".format(course.name))
             course_download(moodle, course.link, course.name)
     elif len(sys.argv) == 3:
-        course_download(moodle, sys.argv[3])
+        course_url = sys.argv[2]
+        if COURSE_RE.match(course_url):
+            print("Downloading the course {} in the current directory."
+                    .format(course_url))
+            course_download(moodle, course_url)
+        else:
+            print("The url {} given as parameter doesn't match the expected scheme {}".format(course_url, COURSE_RE.pattern))
 
 if __name__ == '__main__':
     main()
