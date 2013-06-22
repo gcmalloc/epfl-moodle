@@ -23,6 +23,7 @@ def init_moodle_directory(moodle):
     """
     print("Downloading a list of courses")
     courses = list(moodle.get_courses())
+    logging.debug(courses)
     print("Select the courses you want to download separated"
           "by a comma, '{}' to select all courses.".format(SELECT_ALL_KEY))
     for index, course in enumerate(courses):
@@ -30,6 +31,7 @@ def init_moodle_directory(moodle):
     valid = False
     while not valid:
         input = raw_input(">>")
+        logging.debug(input)
         if input == SELECT_ALL_KEY:
             selection = courses
             valid = True
@@ -43,18 +45,30 @@ def init_moodle_directory(moodle):
     return selection
 
 def course_download(moodle, url, directory=""):
+   """download the course in directory
+   """
+   logging.info("Starting download for course {}".format(url))
    course = Ressource("Course", url)
+   logging.debug(course)
    documents = moodle.get_documents(course)
+   logging.debug(documents)
    if directory and not os.path.exists(directory):
+       logging.info("Directory of the subsection didn't exit")
        os.mkdir(directory)
    for index, documents in enumerate(documents):
+       logging.info("fetching documents, ")
        if index == 0:
+           logging.info("Global dir")
            dir_name = os.path.join(directory, "Globals")
        else:
-           dir_name = os.path.join(directory, "Week "+str(index))
+           logging.info("Dir for week {!s}".format(index))
+           dir_name = os.path.join(directory, "Week " + str(index))
+       logging.debug(dir_name)
        if not os.path.exists(dir_name):
+           logging.info("Dir doesn't exist yet, creating it")
            os.mkdir(dir_name)
        for document in documents:
+           logging.info("fetching document {}".format(document))
            moodle.fetch_document(document, dir_name)
 
 
@@ -75,11 +89,18 @@ def output_to_utf8():
 
 def get_parser():
     parser = argparse.ArgumentParser("moodle")
-    parser.add_argument("-v", "--verbose", "Enable a more verbose logging.", action='store_true')
-    parser.add_argument("--debug", "Enable the most verbose logging possible.", action='store_true')
-    parser.add_argument("username", "The username used for the tequila login.",nargs=1)
-    parser.add_argument("course", "An optional list of courses to fetch into the current directory", nargs='*')
+    parser.add_argument("-v", "--verbose", help="Enable a more verbose logging.", action='store_true')
+    parser.add_argument("--debug", help="Enable the most verbose logging possible.", action='store_true')
+    parser.add_argument("username", help="The username used for the tequila login.",nargs=1)
+    parser.add_argument("course", help="An optional list of courses to fetch into the current directory", nargs='*')
     return parser
+
+def set_logger_level(args):
+        logger = logging.getLogger()
+        if args.debug:
+            logger.setLevel(logging.DEBUG)
+        elif args.verbose:
+            logger.setLevel(logging.INFO)
 
 def main():
     print_banner()
@@ -89,41 +110,48 @@ def main():
     argparser = get_parser()
     args = argparser.parse_args()
 
+    set_logger_level(args)
+    logging.debug(args)
+
     passwd = getpass.getpass()
+    logging.debug(passwd)
     if not passwd:
         print("You didn't provide any password")
         exit(2)
-
-    logger = logging.getLogger()
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-    elif args.verbose:
-        logger.setLevel(logging.INFO)
 
     try:
         logging.info("Moodle handshake, please be patient.")
         moodle = Moodle(args.username, passwd)
     except (ConnexionIssue) as e:
-        print(u"Issue with authentication {}".format(str(e).strip()))
+        print(u"Issue with authentication")
+        logging.info(e)
         exit(2)
 
     if not args.course:
+        logging.info("using the configuration file.")
         if not os.path.exists(CONF_FILE):
+            logging.info("configuration file not found, asking user.")
             selection = init_moodle_directory(moodle)
             with open(CONF_FILE, "w") as f:
                 #serialiaze every course
                 dict_selection = [vars(s) for s in selection]
                 json.dump(dict_selection, f)
         else:
+            logging.info("configuration file found in {}.".format(CONF_FILE))
             with open(CONF_FILE) as f:
                 #deserialize
                 dict_selection = json.load(f)
+                logging.debug(dict_selection)
                 selection = [Ressource(dic['name'], dic['link']) for dic in dict_selection] 
+                logging.debug(selection)
         for course in selection:
-            (u"Fetching course {}.".format(course.name))
+            logging.info(u"Fetching course {}.".format(course.name))
             course_download(moodle, course.link, course.name)
     else:
-        for course in args.course:
+        logging.info("using the courses from argument")
+        logging.debug(args.course)
+        logging.debug(COURSE_RE.pattern)
+        for course_url in args.course:
             if COURSE_RE.match(course_url):
                 print("Downloading the course {} in the current directory."
                         .format(course_url))

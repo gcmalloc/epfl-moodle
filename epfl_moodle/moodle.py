@@ -41,6 +41,7 @@ class Moodle(object):
         """
         self.login(username, password)
         if caching:
+            logging.info("caching enable")
             try:
                 import requests_cache
                 requests_cache.configure('.moodle_cache')
@@ -65,14 +66,19 @@ class Moodle(object):
             resp = self.session.post("https://tequila.epfl.ch/cgi-bin/tequila/login", verify=True, data=payload)
             error = BeautifulSoup(resp.text).find('font', color='red', size='+1')
             if error:
+                logging.info("Tequila error")
+                logging.debug(error.string)
                 #grab the tequila error if any
                 raise TequilaError(error.string)
             if resp.status_code != 200:
+                logging.info("tequila didn't return a 200 code")
+                logging.debug(resp.status_code)
                 raise ConnexionIssue()
 
     def __exit__(self):
         """Close the session when the module is closed.
         """
+        logging.info("closing the tequila session.")
         self.session.close()
 
     def get_courses(self):
@@ -80,10 +86,17 @@ class Moodle(object):
         """
         main_page = self.session.get(Moodle.MAIN_PAGE)
         if main_page.status_code != 200:
+            logging.info("Issue with the listing of courses")
+            logging.debug(main_page)
             raise ConnexionIssue()
         soup = BeautifulSoup(main_page.text)
+        logging.info("Soup created")
         for course_head in soup('h3', 'main'):
+            logging.info("course found")
+            logging.debug(course_head)
             course_link = course_head.find('a')
+            logging.debug(course_link.string)
+            logging.debug(course_link['href'])
             yield Ressource(course_link.string, course_link['href'])
 
     def get_documents(self, course):
@@ -91,25 +104,40 @@ class Moodle(object):
         every item represent a section, and every subitem represent a
         document in the course and in the section.
         """
+        logging.info("get documents")
+        logging.debug(course.link)
         course_page = self.session.get(course.link)
         if course_page.status_code != 200:
+            logging.info("Issue with the fetching")
+            logging.debug(course_page)
             raise ConnexionIssue()
         soup = BeautifulSoup(course_page.text)
+        logging.info("Soup created for the document")
         content = soup.find('div', {'class':'course-content'})
+        logging.debug(content)
         #the student is not registered to the course anymore
         if not content:
             logging.error(u"You are not registered to the course {} anymore.".format(course))
             return list()
         #Week separation
         weeks = content.find('ul',recursive=False).findAll('li', recursive=False)
+        logging.info("Fetching weeks")
+        logging.debug(weeks)
         divisions = list()
         for week in weeks:
+            logging.info("New week")
+            logging.debug(week)
             #week_title = week.find({"class":"sectionname"})
+            logging.info("Fetching document for the week")
             week_documents = week('a')
+            logging.debug(week_documents)
             week_doc = list()
             for i in week_documents:
+                logging.info("fetching document")
+                logging.debug(i)
                 #yes `a` tag without href exist
                 if i.get('href') and 'resource' in i.get('href'):
+                    logging.info("found a link and a ressource")
                     week_doc.append(Ressource(i.text, i['href']))
             divisions.append(week_doc)
         return divisions
