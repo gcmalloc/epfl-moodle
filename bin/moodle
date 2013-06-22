@@ -6,6 +6,8 @@ import json
 import getpass
 import argparse
 import re
+import logging
+
 if sys.version_info[0] == 3:
     raw_input = input
 
@@ -55,11 +57,6 @@ def course_download(moodle, url, directory=""):
        for document in documents:
            moodle.fetch_document(document, dir_name)
 
-def print_usage():
-    print("No username supplied.")
-    print("Usage : moodle username [course-id]")
-    print("If no password is supplied, you will be prompted for it.")
-    exit(1)
 
 def print_banner():
     print('''
@@ -76,27 +73,41 @@ def output_to_utf8():
     streamWriter = codecs.lookup('utf-8')[-1]
     sys.stdout = streamWriter(sys.stdout)
 
+def get_parser():
+    parser = argparse.ArgumentParser("moodle")
+    parser.add_argument("-v", "--verbose", "Enable a more verbose logging.", action='store_true')
+    parser.add_argument("--debug", "Enable the most verbose logging possible.", action='store_true')
+    parser.add_argument("username", "The username used for the tequila login.",nargs=1)
+    parser.add_argument("course", "An optional list of courses to fetch into the current directory", nargs='*')
+    return parser
+
 def main():
     print_banner()
     if sys.version_info[0] == 2:
         output_to_utf8()
 
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print_usage()
+    argparser = get_parser()
+    args = argparser.parse_args()
 
     passwd = getpass.getpass()
     if not passwd:
         print("You didn't provide any password")
         exit(2)
 
+    logger = logging.getLogger()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    elif args.verbose:
+        logger.setLevel(logging.INFO)
+
     try:
-        print("Moodle handshake, please be patient.")
-        moodle = Moodle(sys.argv[1], passwd)
+        logging.info("Moodle handshake, please be patient.")
+        moodle = Moodle(args.username, passwd)
     except (ConnexionIssue) as e:
         print(u"Issue with authentication {}".format(str(e).strip()))
         exit(2)
 
-    if len(sys.argv) == 2:
+    if not args.course:
         if not os.path.exists(CONF_FILE):
             selection = init_moodle_directory(moodle)
             with open(CONF_FILE, "w") as f:
@@ -109,16 +120,16 @@ def main():
                 dict_selection = json.load(f)
                 selection = [Ressource(dic['name'], dic['link']) for dic in dict_selection] 
         for course in selection:
-            print(u"Fetching course {}.".format(course.name))
+            (u"Fetching course {}.".format(course.name))
             course_download(moodle, course.link, course.name)
-    elif len(sys.argv) == 3:
-        course_url = sys.argv[2]
-        if COURSE_RE.match(course_url):
-            print("Downloading the course {} in the current directory."
-                    .format(course_url))
-            course_download(moodle, course_url)
-        else:
-            print("The url {} given as parameter doesn't match the expected scheme {}".format(course_url, COURSE_RE.pattern))
+    else:
+        for course in args.course:
+            if COURSE_RE.match(course_url):
+                print("Downloading the course {} in the current directory."
+                        .format(course_url))
+                course_download(moodle, course_url)
+            else:
+                print("The url {} given as parameter doesn't match the expected scheme {}".format(course_url, COURSE_RE.pattern))
 
 if __name__ == '__main__':
     main()
