@@ -30,8 +30,6 @@ class TequilaError(ConnexionIssue):
 
 class Moodle(object):
 
-    CHUNCK  = 1024 * 1024
-
     TEQUILA_LOGIN = "http://moodle.epfl.ch/login/index.php"
 
     MAIN_PAGE = "http://moodle.epfl.ch/my"
@@ -64,7 +62,8 @@ class Moodle(object):
             self.sesskey = dict_query['requestkey'][0]
             payload = {'requestkey': self.sesskey, 'username': username, 'password': password}
             resp = self.session.post("https://tequila.epfl.ch/cgi-bin/tequila/login", verify=True, data=payload)
-            error = BeautifulSoup(resp.text).find('font', color='red', size='+1')
+            error = BeautifulSoup(resp.text, 'html.parser') \
+                    .find('font', color='red', size='+1')
             if error:
                 logging.info("Tequila error")
                 logging.debug(error.string)
@@ -89,7 +88,7 @@ class Moodle(object):
             logging.info("Issue with the listing of courses")
             logging.debug(main_page)
             raise ConnexionIssue()
-        soup = BeautifulSoup(main_page.text)
+        soup = BeautifulSoup(main_page.text, 'html.parser')
         logging.info("Soup created")
         for course_head in soup.find_all(class_='course_title'):
             logging.info("course found")
@@ -111,7 +110,7 @@ class Moodle(object):
             logging.info("Issue with the fetching")
             logging.debug(course_page)
             raise ConnexionIssue()
-        soup = BeautifulSoup(course_page.text)
+        soup = BeautifulSoup(course_page.text, 'html.parser')
         logging.info("Soup created for the document")
         content = soup.find('div', {'class':'course-content'})
         logging.debug(content)
@@ -152,7 +151,7 @@ class Moodle(object):
             #we have a redirection
             content_url = content_page.url
         else:
-            soup = BeautifulSoup(content_page.text)
+            soup = BeautifulSoup(content_page.text, 'html.parser')
             content_tag = soup.find('object', {'id':'resourceobject'})
             video_tag = soup.find('object', {'type':'video/mp4'})
             if content_tag:
