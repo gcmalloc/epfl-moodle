@@ -2,8 +2,10 @@
 import requests
 try:
     import urlparse
+    from urllib import unquote
 except ImportError:
     import urllib.parse as urlparse
+    from urllib.parse import unquote
 import logging
 try:
     from bs4 import BeautifulSoup
@@ -171,7 +173,8 @@ class Moodle(object):
                     return
 
         file_in = self.session.get(content_url)
-        file_name = os.path.basename(urlparse.urlparse(content_url)[2])
+        file_name = unquote(urlparse.urlparse(content_url)[2])
+        file_name = os.path.basename(file_name)
         file_path = os.path.join(directory, file_name)
 
         if os.path.exists(file_path):
