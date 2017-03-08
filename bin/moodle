@@ -135,7 +135,7 @@ def main():
             with open(CONF_FILE, "w") as f:
                 #serialiaze every course
                 dict_selection = [vars(s) for s in selection]
-                json.dump(dict_selection, f)
+                json.dump(dict_selection, f, indent=2, sort_keys=True)
         else:
             logging.info("configuration file found in {}.".format(CONF_FILE))
             with open(CONF_FILE) as f:
