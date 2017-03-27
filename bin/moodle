@@ -91,7 +91,7 @@ def get_parser():
     parser = argparse.ArgumentParser("moodle")
     parser.add_argument("-v", "--verbose", help="Enable a more verbose logging.", action='store_true')
     parser.add_argument("--debug", help="Enable the most verbose logging possible.", action='store_true')
-    parser.add_argument("username", help="The username used for the tequila login.",nargs=1)
+    parser.add_argument("username", help="The username used for the tequila login.")
     parser.add_argument("course", help="An optional list of courses to fetch into the current directory", nargs='*')
     return parser
 
