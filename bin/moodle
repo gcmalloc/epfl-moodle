@@ -7,6 +7,7 @@ import getpass
 import argparse
 import re
 import logging
+import keyring
 
 if sys.version_info[0] == 3:
     raw_input = input
@@ -91,6 +92,7 @@ def get_parser():
     parser = argparse.ArgumentParser("moodle")
     parser.add_argument("-v", "--verbose", help="Enable a more verbose logging.", action='store_true')
     parser.add_argument("--debug", help="Enable the most verbose logging possible.", action='store_true')
+    parser.add_argument("--no-keychain", help="Disable password storage in system keychain", action='store_false', dest='use_keychain')
     parser.add_argument("username", help="The username used for the tequila login.")
     parser.add_argument("course", help="An optional list of courses to fetch into the current directory", nargs='*')
     return parser
@@ -113,11 +115,25 @@ def main():
     set_logger_level(args)
     logging.debug(args)
 
-    passwd = getpass.getpass()
-    logging.debug(passwd)
+    # Try to get password from system keychain, ask for it otherwise
+    logging.debug(args.use_keychain)
+    if args.use_keychain:
+        passwd = keyring.get_password('moodle', args.username)
+    else:
+        passwd = None
+
+    # If no password was found, ask for it.
+    if not passwd:
+        logging.info('No password in keychain.')
+        passwd = getpass.getpass()
+
     if not passwd:
         print("You didn't provide any password")
         exit(2)
+
+    if args.use_keychain:
+        logging.info('Storing password in keychain')
+        keyring.set_password('moodle', args.username, passwd)
 
     try:
         logging.info("Moodle handshake, please be patient.")
