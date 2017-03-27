@@ -4,6 +4,7 @@
 * `python-2.7`
 * `BeautifulSoup` (installed by the setup.py)
 * `requests` (installed by the setup.py)
+* `keyring` (installed by the setup.py)
 * `requests-cache` (optional)
 * A moodle account subscribed to at least one course
 
