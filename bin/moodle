@@ -53,6 +53,10 @@ def course_download(moodle, url, directory=""):
    logging.debug(course)
    documents = moodle.get_documents(course)
    logging.debug(documents)
+
+   # Sanitize directory name
+   directory = directory.replace('/', '_')
+
    if directory and not os.path.exists(directory):
        logging.info("Directory of the subsection didn't exit")
        os.mkdir(directory)
