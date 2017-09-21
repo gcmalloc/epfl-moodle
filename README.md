@@ -4,7 +4,8 @@
 * `python-3.4` or above.
 * `BeautifulSoup` (installed by the setup.py)
 * `requests` (installed by the setup.py)
-* `keyring` (installed by the setup.py)
+* `keyring` (installed by the setup.py).
+    Note that depending on your desktop environment, you might also need to install `keyrings.alt`.
 * `requests-cache` (optional)
 * A moodle account subscribed to at least one course
 
