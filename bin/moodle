@@ -69,6 +69,11 @@ def course_download(moodle, url, directory=""):
            logging.info("Dir for week {!s}".format(index))
            dir_name = os.path.join(directory, "Week " + str(index))
        logging.debug(dir_name)
+
+       if not documents:
+           logging.info("No material for this category, skipping")
+           continue
+
        if not os.path.exists(dir_name):
            logging.info("Dir doesn't exist yet, creating it")
            os.mkdir(dir_name)
